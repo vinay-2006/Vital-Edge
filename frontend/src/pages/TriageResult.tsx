@@ -4,6 +4,7 @@ import { ArrowLeft, Check, ChevronDown, Shield, AlertTriangle, Heart } from 'luc
 import { TriageResult as TriageResultType, TriagePriority } from '@/lib/types';
 import { ExplainabilityPanel } from '@/components/ExplainabilityPanel';
 import { RiskAssessmentCard } from '@/components/RiskAssessmentCard';
+import { ExperimentalImagingCard } from '@/components/ExperimentalImagingCard';
 import { priorityConfig, formatTime } from '@/lib/triage-utils';
 import { apiClient } from '@/lib/api-client';
 
@@ -130,6 +131,11 @@ const TriageResultPage = () => {
 
       {/* Risk Assessment Card */}
       <RiskAssessmentCard riskAssessment={result.riskAssessment} />
+
+      {/* Experimental Imaging Engine (CRITICAL ONLY) */}
+      {result.priority === 'CRITICAL' && (
+        <ExperimentalImagingCard result={result} />
+      )}
 
       {/* Score Breakdown */}
       <div className="bg-card rounded-xl p-4 shadow-sm border border-border">

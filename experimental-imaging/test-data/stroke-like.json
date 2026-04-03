@@ -1,0 +1,14 @@
+{
+  "triage_level": "RED",
+  "vitals": {
+    "heart_rate": 132,
+    "blood_pressure": "180/110",
+    "spo2": 93
+  },
+  "symptoms": [
+    "slurred speech",
+    "facial droop",
+    "one-sided weakness"
+  ],
+  "image_path": "test-data/sample-images/stroke-like.jpg"
+}

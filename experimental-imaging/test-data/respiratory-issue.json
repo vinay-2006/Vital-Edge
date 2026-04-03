@@ -1,0 +1,14 @@
+{
+  "triage_level": "RED",
+  "vitals": {
+    "heart_rate": 118,
+    "respiratory_rate": 29,
+    "spo2": 87
+  },
+  "symptoms": [
+    "shortness of breath",
+    "persistent cough",
+    "chest tightness"
+  ],
+  "image_path": "test-data/sample-images/respiratory-issue.png"
+}

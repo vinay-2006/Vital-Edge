@@ -26,6 +26,30 @@ interface ResponseWithRecentEntries {
   recentEntries: RecentEntry[];
 }
 
+export interface AnalyzeImagingInput {
+  triage_level: string;
+  vitals: any;
+  symptoms: string[];
+}
+
+export interface AnalyzeImagingResponse {
+  imaging_recommended: boolean;
+  reason: string;
+  pipeline: string[];
+  analysis: {
+    risk_score: number;
+    possible_condition: string;
+    confidence: number;
+  } | null;
+  report: {
+    summary: string;
+    findings: string[];
+    recommendation: string;
+  };
+  safety_disclaimer: string[];
+  image_path: string | null;
+}
+
 // Extend axios config type to support retry tracking
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retryCount?: number;
@@ -191,6 +215,39 @@ class ApiClient {
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     const response = await this.client.get('/health');
     return response.data;
+  }
+
+  /**
+   * [EXPERIMENTAL] Call the local imaging analysis module
+   * Fails gracefully if not running locally.
+   */
+  async analyzeImaging(
+    input: AnalyzeImagingInput,
+    mockImagePath?: string
+  ): Promise<AnalyzeImagingResponse> {
+    const url = import.meta.env.VITE_IMAGING_API_URL || 'http://localhost:4010';
+    
+    try {
+      const response = await axios.post<AnalyzeImagingResponse>(
+        `${url}/analyze-imaging`,
+        {
+          ...input,
+          image_path: mockImagePath,
+        },
+        { timeout: 10000 } // Fail fast if offline
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data?.error) {
+          throw new Error(error.response.data.error);
+        }
+        if (!error.response) {
+          throw new Error('Experimental module offline. Please run `npm run dev:imaging` locally.');
+        }
+      }
+      throw error;
+    }
   }
 }
 
