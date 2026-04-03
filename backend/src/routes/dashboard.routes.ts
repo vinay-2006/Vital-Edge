@@ -12,16 +12,17 @@ router.get('/summary', async (_req: Request, res: Response): Promise<void> => {
   try {
     const supabase = getSupabaseClient();
 
-    // Get today's date range (midnight to now)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = today.toISOString();
+    // Get yesterday's midnight (start of yesterday) to cover today + yesterday
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    const yesterdayStr = yesterday.toISOString();
 
-    // Query all records from today
+    // Query all records from yesterday onwards (today + yesterday)
     const { data: records, error } = await supabase
       .from('triage_records')
       .select('*')
-      .gte('created_at', todayStr)
+      .gte('created_at', yesterdayStr)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -51,8 +52,8 @@ router.get('/summary', async (_req: Request, res: Response): Promise<void> => {
 
     const ambulanceModeCount = allRecords.filter((r) => r.mode === 'AMBULANCE').length;
 
-    // Get recent 10 entries and map to TriageResult
-    const recentEntries: TriageResult[] = allRecords.slice(0, 10).map((data) => ({
+    // Get recent 30 entries (today + yesterday) and map to TriageResult
+    const recentEntries: TriageResult[] = allRecords.slice(0, 30).map((data) => ({
       id: data.id,
       priority: data.priority,
       confidence: data.confidence_score,

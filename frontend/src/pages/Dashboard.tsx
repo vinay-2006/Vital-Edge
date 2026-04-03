@@ -4,7 +4,7 @@ import { Users, AlertTriangle, Shield, Heart, Plus, Download, Activity, Ambulanc
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { apiClient } from '@/lib/api-client';
 import { DashboardSummary } from '@/lib/types';
-import { priorityConfig, formatTime } from '@/lib/triage-utils';
+import { priorityConfig, formatDateTime } from '@/lib/triage-utils';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -73,7 +73,7 @@ const DashboardPage = () => {
   ];
 
   const metrics = [
-    { label: 'Total Today', value: data.totalToday, icon: <Users size={22} />, bgClass: 'bg-primary/10 text-primary' },
+    { label: 'Total (2 Days)', value: data.totalToday, icon: <Users size={22} />, bgClass: 'bg-primary/10 text-primary' },
     { label: 'Critical', value: data.red, icon: <AlertTriangle size={22} />, bgClass: 'triage-critical-bg-soft triage-critical-text' },
     { label: 'Moderate', value: data.yellow, icon: <Shield size={22} />, bgClass: 'triage-moderate-bg-soft triage-moderate-text' },
     { label: 'Stable', value: data.green, icon: <Heart size={22} />, bgClass: 'triage-stable-bg-soft triage-stable-text' },
@@ -159,7 +159,7 @@ const DashboardPage = () => {
 
       {/* Table */}
       <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider p-4 pb-2">Recent Entries (Last 10)</h3>
+        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider p-4 pb-2">Recent Entries (Last 30 · Today &amp; Yesterday)</h3>
         {data.recentEntries.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -170,7 +170,7 @@ const DashboardPage = () => {
                   <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Confidence</th>
                   <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Risk</th>
                   <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Mode</th>
-                  <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Time</th>
+                  <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Date &amp; Time</th>
                 </tr>
               </thead>
               <tbody>
@@ -201,7 +201,7 @@ const DashboardPage = () => {
                           <span className="text-xs text-muted-foreground">🏥 HOS</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground font-medium">{formatTime(entry.createdAt)}</td>
+                      <td className="px-4 py-3 text-muted-foreground font-medium whitespace-nowrap">{formatDateTime(entry.createdAt)}</td>
                     </tr>
                   );
                 })}
