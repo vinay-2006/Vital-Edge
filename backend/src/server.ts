@@ -12,9 +12,29 @@ import auditRoutes from './routes/audit.routes';
 
 const app: Application = express();
 
+const allowedOrigins = env.CORS_ORIGIN
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0);
+
+const isOriginAllowed = (origin: string): boolean => {
+  return allowedOrigins.some((allowedOrigin) => {
+    if (allowedOrigin.startsWith('*.')) {
+      return origin.endsWith(allowedOrigin.slice(1));
+    }
+    return origin === allowedOrigin;
+  });
+};
+
 // Middleware
 app.use(cors({
-  origin: env.CORS_ORIGIN,
+  origin: (origin, callback) => {
+    if (!origin || isOriginAllowed(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true,
 }));
 
