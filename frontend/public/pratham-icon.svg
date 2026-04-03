@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Blue background -->
+  <rect width="64" height="64" rx="16" fill="url(#blueGrad)" />
+  <!-- Heart shape -->
+  <path d="M32 50 C32 50 14 36 14 24 C14 17 19 12 26 12 C29 12 30.5 13.5 32 15.5 C33.5 13.5 35 12 38 12 C45 12 50 17 50 24 C50 36 32 50 32 50Z"
+        fill="white" />
+  <!-- ECG / pulse line cutting the heart (so it acts as a blue cutout) -->
+  <polyline
+    points="10,28 20,28 24,18 30,40 34,20 38,32 44,28 54,28"
+    stroke="#1d4ed8"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1e40af" />
+    </linearGradient>
+  </defs>
+</svg>

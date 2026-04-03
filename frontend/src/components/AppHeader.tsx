@@ -17,12 +17,12 @@ const AppHeader = () => {
     <>
       <header className="bg-surface-elevated border-b border-border px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="bg-primary rounded-lg p-2">
-            <Activity size={20} className="text-primary-foreground" />
+          <div className="w-10 h-10 shrink-0">
+            <img src="/pratham-icon.svg" alt="Pratham" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground leading-tight">AI Triage Optimizer</h1>
-            <p className="text-xs text-muted-foreground">Government Hospital System</p>
+            <h1 className="text-xl font-bold text-foreground leading-tight tracking-tight">PRATHAM</h1>
+            <p className="text-xs text-muted-foreground font-medium">AI Triage System</p>
           </div>
         </div>
 
