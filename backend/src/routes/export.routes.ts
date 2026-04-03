@@ -11,7 +11,7 @@ const router = Router();
  * GET /api/export/csv
  * Export triage records to CSV
  */
-router.get('/csv', async (req: Request, res: Response) => {
+router.get('/csv', async (req: Request, res: Response): Promise<void> => {
   try {
     const querySchema = z.object({
       startDate: z.string().optional(),
@@ -37,7 +37,8 @@ router.get('/csv', async (req: Request, res: Response) => {
 
     if (error) {
       console.error('Export query error:', error);
-      return res.status(500).json({ error: 'Failed to fetch records for export' });
+      res.status(500).json({ error: 'Failed to fetch records for export' });
+      return;
     }
 
     const allRecords = records || [];
@@ -116,12 +117,15 @@ router.get('/csv', async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(csv);
+    return;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid query parameters', details: error.errors });
+      res.status(400).json({ error: 'Invalid query parameters', details: error.errors });
+      return;
     }
     console.error('CSV export error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 

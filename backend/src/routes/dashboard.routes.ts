@@ -8,7 +8,7 @@ const router = Router();
  * GET /api/dashboard/summary
  * Get dashboard summary with today's statistics
  */
-router.get('/summary', async (req: Request, res: Response) => {
+router.get('/summary', async (_req: Request, res: Response): Promise<void> => {
   try {
     const supabase = getSupabaseClient();
 
@@ -26,7 +26,8 @@ router.get('/summary', async (req: Request, res: Response) => {
 
     if (error) {
       console.error('Dashboard query error:', error);
-      return res.status(500).json({ error: 'Failed to fetch dashboard data' });
+      res.status(500).json({ error: 'Failed to fetch dashboard data' });
+      return;
     }
 
     const allRecords = records || [];
@@ -120,9 +121,11 @@ router.get('/summary', async (req: Request, res: Response) => {
     };
 
     res.json(summary);
+    return;
   } catch (error) {
     console.error('Dashboard error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 

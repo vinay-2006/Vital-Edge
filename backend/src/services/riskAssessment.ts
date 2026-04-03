@@ -68,8 +68,6 @@ export class RiskAssessmentService {
    * Identify specific risk indicators
    */
   private identifyRiskIndicators(
-    priority: Priority,
-    score: TriageScore,
     input: TriageInput
   ): string[] {
     const indicators: string[] = [];
@@ -225,7 +223,7 @@ export class RiskAssessmentService {
   ): RiskAssessment {
     const deteriorationRisk = this.calculateDeteriorationRisk(priority, score, input);
     const riskTimeframe = this.estimateRiskTimeframe(deteriorationRisk, input);
-    const riskIndicators = this.identifyRiskIndicators(priority, score, input);
+    const riskIndicators = this.identifyRiskIndicators(input);
     const preparationNotes = this.generatePreparationNotes(priority, deteriorationRisk, input);
 
     return {

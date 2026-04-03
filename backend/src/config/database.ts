@@ -14,4 +14,4 @@ export function getSupabaseClient(): SupabaseClient {
   return supabase;
 }
 
-export { supabase };
+// Use getSupabaseClient() to access the Supabase client — do not import `supabase` directly.

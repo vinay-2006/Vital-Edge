@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { logger } from '../services/auditLogger';
 
 export interface AppError extends Error {
@@ -9,8 +9,7 @@ export interface AppError extends Error {
 export function errorHandler(
   err: AppError,
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): void {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal server error';
@@ -31,6 +30,6 @@ export function errorHandler(
   });
 }
 
-export function notFoundHandler(req: Request, res: Response): void {
+export function notFoundHandler(_req: Request, res: Response): void {
   res.status(404).json({ error: 'Route not found' });
 }

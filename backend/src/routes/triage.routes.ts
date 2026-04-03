@@ -46,7 +46,7 @@ const triageInputSchema = z.object({
  * POST /api/triage
  * Submit a new triage case
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
     // Validate input
     const validatedInput = triageInputSchema.parse(req.body);
@@ -127,7 +127,8 @@ router.post('/', async (req: Request, res: Response) => {
 
     if (error) {
       console.error('Database insert error:', error);
-      return res.status(500).json({ error: 'Failed to save triage record' });
+      res.status(500).json({ error: 'Failed to save triage record' });
+      return;
     }
 
     // Log audit event
@@ -158,12 +159,15 @@ router.post('/', async (req: Request, res: Response) => {
     };
 
     res.status(201).json(result);
+    return;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return;
     }
     console.error('Triage submission error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 
@@ -171,7 +175,7 @@ router.post('/', async (req: Request, res: Response) => {
  * GET /api/triage/:id
  * Retrieve a specific triage record
  */
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const supabase = getSupabaseClient();
@@ -183,7 +187,8 @@ router.get('/:id', async (req: Request, res: Response) => {
       .single();
 
     if (error || !data) {
-      return res.status(404).json({ error: 'Triage record not found' });
+      res.status(404).json({ error: 'Triage record not found' });
+      return;
     }
 
     // Map database record to TriageResult
@@ -245,9 +250,11 @@ router.get('/:id', async (req: Request, res: Response) => {
     };
 
     res.json(result);
+    return;
   } catch (error) {
     console.error('Fetch triage error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 
@@ -255,7 +262,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  * POST /api/triage/:id/override
  * Override the priority of a triage record
  */
-router.post('/:id/override', async (req: Request, res: Response) => {
+router.post('/:id/override', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const overrideSchema = z.object({
@@ -275,7 +282,8 @@ router.post('/:id/override', async (req: Request, res: Response) => {
       .single();
 
     if (fetchError || !currentRecord) {
-      return res.status(404).json({ error: 'Triage record not found' });
+      res.status(404).json({ error: 'Triage record not found' });
+      return;
     }
 
     const oldPriority = currentRecord.priority;
@@ -293,7 +301,8 @@ router.post('/:id/override', async (req: Request, res: Response) => {
       .single();
 
     if (error) {
-      return res.status(500).json({ error: 'Failed to override priority' });
+      res.status(500).json({ error: 'Failed to override priority' });
+      return;
     }
 
     // Log audit event
@@ -364,12 +373,15 @@ router.post('/:id/override', async (req: Request, res: Response) => {
     };
 
     res.json(result);
+    return;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return;
     }
     console.error('Override error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 

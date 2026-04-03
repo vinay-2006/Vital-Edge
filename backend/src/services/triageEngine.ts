@@ -6,8 +6,6 @@ interface ScoreBreakdown {
   reason: string;
 }
 
-const RED_FLAG_SYMPTOMS = ['unconscious', 'seizure', 'chestPain'] as const;
-
 export class TriageEngine {
   /**
    * Calculate vital signs score (0-40 points)

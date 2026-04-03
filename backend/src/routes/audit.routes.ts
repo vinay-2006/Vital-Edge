@@ -8,7 +8,7 @@ const router = Router();
  * GET /api/audit-logs
  * Retrieve audit logs with optional filters
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const querySchema = z.object({
       limit: z.string().transform(Number).pipe(z.number().min(1).max(1000)).optional(),
@@ -31,12 +31,15 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     res.json({ logs, count: logs.length });
+    return;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid query parameters', details: error.errors });
+      res.status(400).json({ error: 'Invalid query parameters', details: error.errors });
+      return;
     }
     console.error('Audit logs error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 
