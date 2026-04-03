@@ -1,8 +1,12 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { TriageInput, TriageResult, DashboardSummary } from './types';
 import { toDBPriority, toFrontendPriority } from './priority-mapper';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+// Render free tier sleeps after 15 min inactivity — cold start takes up to 60s
+const REQUEST_TIMEOUT_MS = 70000; // 70 seconds
+const MAX_RETRIES = 1;
 
 type BackendPriority = 'RED' | 'YELLOW' | 'GREEN';
 
@@ -22,6 +26,11 @@ interface ResponseWithRecentEntries {
   recentEntries: RecentEntry[];
 }
 
+// Extend axios config type to support retry tracking
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retryCount?: number;
+}
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -31,7 +40,7 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 30000,
+      timeout: REQUEST_TIMEOUT_MS,
     });
 
     // Request interceptor - convert frontend priorities to backend format
@@ -54,7 +63,7 @@ class ApiClient {
           'priority' in response.data
         ) {
           const data = response.data as ResponseWithPriority;
-          data.priority = toFrontendPriority(data.priority);
+          data.priority = toFrontendPriority(data.priority) as unknown as BackendPriority;
         }
 
         // Convert priorities in array responses
@@ -66,19 +75,34 @@ class ApiClient {
           const data = response.data as ResponseWithRecentEntries;
           data.recentEntries = data.recentEntries.map((entry) => ({
             ...entry,
-            priority: toFrontendPriority(entry.priority),
+            priority: toFrontendPriority(entry.priority) as unknown as BackendPriority,
           }));
         }
 
         return response;
       },
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
+        const config = error.config as RetryableRequestConfig | undefined;
+
+        // Auto-retry once on network errors (handles Render cold-start timeouts)
+        if (!error.response && config) {
+          config._retryCount = config._retryCount ?? 0;
+          if (config._retryCount < MAX_RETRIES) {
+            config._retryCount += 1;
+            // Brief pause before retry
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            return this.client(config);
+          }
+        }
+
         // Handle errors with user-friendly messages
         if (error.response) {
           const message = (error.response.data as ApiErrorResponse | undefined)?.error || 'Server error occurred';
           throw new Error(message);
         } else if (error.request) {
-          throw new Error('Cannot connect to server. Please check your connection.');
+          throw new Error(
+            'Server is waking up — this can take up to 60 seconds on first load. Please try again in a moment.'
+          );
         } else {
           throw new Error('Request failed. Please try again.');
         }

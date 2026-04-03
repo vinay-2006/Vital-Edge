@@ -127,7 +127,8 @@ export class TriageEngine {
       });
     }
 
-    return { score, breakdown };
+    // Clamp vital score to stated max of 40
+    return { score: Math.min(score, 40), breakdown };
   }
 
   /**
@@ -229,7 +230,8 @@ export class TriageEngine {
       });
     }
 
-    return { score, breakdown, hasRedFlag };
+    // Clamp symptom score to stated max of 40
+    return { score: Math.min(score, 40), breakdown, hasRedFlag };
   }
 
   /**

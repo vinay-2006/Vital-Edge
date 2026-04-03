@@ -4,3 +4,6 @@ node_modules/
 *.log
 .venv/
 *.pt
+
+.vercel
+.env*.local

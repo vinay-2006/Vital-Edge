@@ -137,15 +137,15 @@ const TriageResultPage = () => {
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="font-semibold text-foreground">Total Score:</span>
-            <span className="text-xl font-bold text-primary">{result.score.totalScore}/100</span>
+            <span className="text-xl font-bold text-primary">{Math.min(result.score.totalScore, 80)}/80</span>
           </div>
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Vital Signs Score:</span>
-            <span className="font-semibold text-foreground">{result.score.vitalScore}/40</span>
+            <span className="font-semibold text-foreground">{Math.min(result.score.vitalScore, 40)}/40</span>
           </div>
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Symptom Score:</span>
-            <span className="font-semibold text-foreground">{result.score.symptomScore}/40</span>
+            <span className="font-semibold text-foreground">{Math.min(result.score.symptomScore, 40)}/40</span>
           </div>
         </div>
       </div>
