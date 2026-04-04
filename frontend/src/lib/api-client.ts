@@ -121,7 +121,15 @@ class ApiClient {
 
         // Handle errors with user-friendly messages
         if (error.response) {
-          const message = (error.response.data as ApiErrorResponse | undefined)?.error || 'Server error occurred';
+          const data = error.response.data as any;
+          let message = data?.error || 'Server error occurred';
+          
+          // Surface Zod validation details from the backend
+          if (data?.details && Array.isArray(data.details)) {
+            const detailedMsgs = data.details.map((d: any) => `${d.path.join('.')}: ${d.message}`).join(', ');
+            message += ` >> ${detailedMsgs}`;
+          }
+          
           throw new Error(message);
         } else if (error.request) {
           throw new Error(
