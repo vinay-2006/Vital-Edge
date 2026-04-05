@@ -13,7 +13,7 @@ import { generateImagingReport } from "../services/reportGeneratorService";
 import { assertSupportedImage, resolveExistingImagePath } from "../services/storageService";
 import { SAFETY_DISCLAIMERS } from "../utils/safety";
 
-const moduleRoot = path.resolve(__dirname, "..", "..");
+const moduleRoot = process.cwd();
 const mockStorageDir = path.resolve(moduleRoot, "mock-storage");
 
 const storage = multer.diskStorage({

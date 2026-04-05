@@ -8,7 +8,7 @@ const port = Number(process.env.IMAGING_PORT || 4010);
 
 app.use(cors());
 app.use(express.json());
-app.use("/mock-storage", express.static(path.resolve(__dirname, "mock-storage")));
+app.use("/mock-storage", express.static(path.resolve(process.cwd(), "mock-storage")));
 app.use("/", imagingRouter);
 
 app.get("/", (_req, res) => {
