@@ -17,3 +17,13 @@ services:
         sync: false
       - key: CORS_ORIGIN
         sync: false
+
+  - type: web
+    name: vital-edge-imaging
+    runtime: node
+    rootDir: experimental-imaging
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    autoDeploy: true
