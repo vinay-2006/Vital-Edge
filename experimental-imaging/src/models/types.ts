@@ -19,10 +19,23 @@ export interface PipelineEvent {
   at: string;
 }
 
+export interface ImageMetrics {
+  contrast: number;
+  variance: number;
+}
+
+export interface ExplainabilityMetrics {
+  clinical_weight: number;
+  image_weight: number;
+  image_influence: string;
+}
+
 export interface AiAnalysisOutput {
   abnormality_detected: boolean;
   possible_condition: string;
   confidence: number;
+  explanation: ExplainabilityMetrics;
+  image_metrics: ImageMetrics;
 }
 
 export interface ImagingReport {
@@ -40,4 +53,6 @@ export interface AnalyzeImagingResponse {
   analysis: AiAnalysisOutput | null;
   report: ImagingReport;
   safety_disclaimer: string[];
+  processing_time_ms: number;
+  note?: string;
 }

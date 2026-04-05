@@ -8,7 +8,7 @@ import {
 } from "../models/types";
 import { runMockDicomPipeline } from "../pipeline/mockDicomPipeline";
 import { getImagingRecommendation } from "../services/imagingRecommendationService";
-import { runMockInference } from "../services/mockInferenceService";
+import { runRealInference } from "../services/mockInferenceService";
 import { generateImagingReport } from "../services/reportGeneratorService";
 import { assertSupportedImage, resolveExistingImagePath } from "../services/storageService";
 import { SAFETY_DISCLAIMERS } from "../utils/safety";
@@ -24,7 +24,16 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.includes("image")) {
+      return cb(new Error("Invalid file type"));
+    }
+    cb(null, true);
+  }
+});
 
 function parseVitals(rawVitals: unknown): AnalyzeImagingInput["vitals"] {
   if (!rawVitals) {
@@ -93,26 +102,41 @@ export const imagingRouter = express.Router();
 imagingRouter.post(
   "/analyze-imaging",
   upload.single("image"),
-  (req, res): void => {
+  async (req, res): Promise<void> => {
+    const start = Date.now();
     try {
       const input = extractInput(req);
       const recommendation = getImagingRecommendation(input);
 
       let resolvedImagePath = "";
+      let note: string | undefined = undefined;
+
       if (recommendation.imaging_recommended) {
         if (req.file?.path) {
+          console.log(`[UPLOAD] Image received via network: ${req.file.originalname}`);
           resolvedImagePath = req.file.path;
           assertSupportedImage(resolvedImagePath);
         } else if (input.image_path) {
           resolvedImagePath = resolveExistingImagePath(input.image_path, moduleRoot);
+          console.log(`[UPLOAD] Image received via local path: ${resolvedImagePath}`);
         } else {
-          throw new Error("Provide either multipart field 'image' or JSON field 'image_path' for RED triage");
+          note = "Imaging not yet available";
         }
       }
 
+      console.log(`[PIPELINE] Processing started for triage: ${input.triage_level}`);
       const pipeline = recommendation.imaging_recommended ? runMockDicomPipeline() : [];
-      const analysis = recommendation.imaging_recommended ? runMockInference(input) : null;
+      let analysis = null;
+      
+      if (recommendation.imaging_recommended && resolvedImagePath) {
+         analysis = await runRealInference(input, resolvedImagePath);
+         console.log(`[AI] Analysis complete`);
+      }
+      
       const report = generateImagingReport(input, analysis);
+      console.log(`[REPORT] Generated`);
+      
+      const processing_time_ms = Date.now() - start;
 
       const response: AnalyzeImagingResponse = {
         imaging_recommended: recommendation.imaging_recommended,
@@ -121,6 +145,8 @@ imagingRouter.post(
         analysis,
         report,
         safety_disclaimer: [...SAFETY_DISCLAIMERS],
+        processing_time_ms,
+        note
       };
 
       res.status(200).json({

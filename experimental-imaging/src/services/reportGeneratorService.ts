@@ -31,10 +31,10 @@ export function generateImagingReport(
   return {
     summary: analysis.abnormality_detected
       ? "AI output is suggestive of abnormal findings requiring immediate clinical attention."
-      : "AI output does not indicate a clear acute abnormal pattern in this mock analysis.",
+      : "AI output does not indicate a clear acute abnormal pattern in this heuristic analysis.",
     findings,
     recommendation,
-    confidence: `${Math.round(analysis.confidence * 100)}% (simulated)`,
+    confidence: `${Math.round(analysis.confidence * 100)}% (computed algorithmically)`,
     safety_note: [...SAFETY_DISCLAIMERS],
   };
 }

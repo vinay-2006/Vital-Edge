@@ -37,9 +37,18 @@ export interface AnalyzeImagingResponse {
   reason: string;
   pipeline: string[];
   analysis: {
-    risk_score: number;
+    abnormality_detected: boolean;
     possible_condition: string;
     confidence: number;
+    explanation: {
+      clinical_weight: number;
+      image_weight: number;
+      image_influence: string;
+    };
+    image_metrics: {
+      contrast: number;
+      variance: number;
+    };
   } | null;
   report: {
     summary: string;
@@ -47,7 +56,8 @@ export interface AnalyzeImagingResponse {
     recommendation: string;
   };
   safety_disclaimer: string[];
-  image_path: string | null;
+  processing_time_ms: number;
+  note?: string;
 }
 
 // Extend axios config type to support retry tracking
@@ -231,18 +241,29 @@ class ApiClient {
    */
   async analyzeImaging(
     input: AnalyzeImagingInput,
-    mockImagePath?: string
+    imageFile: File | null
   ): Promise<AnalyzeImagingResponse> {
     const url = import.meta.env.VITE_IMAGING_API_URL || 'http://localhost:4010';
     
     try {
+      const formData = new FormData();
+      formData.append('triage_level', input.triage_level);
+      formData.append('vitals', JSON.stringify(input.vitals));
+      formData.append('symptoms', JSON.stringify(input.symptoms));
+      
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
       const response = await axios.post<AnalyzeImagingResponse>(
         `${url}/analyze-imaging`,
-        {
-          ...input,
-          image_path: mockImagePath,
-        },
-        { timeout: 10000 } // Fail fast if offline
+        formData,
+        { 
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
       );
       return response.data;
     } catch (error) {
